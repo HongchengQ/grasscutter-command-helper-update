@@ -260,58 +260,58 @@ async function spider(langObj) {
         })
     }
 
-    async function getItems(id) {
-        const url = 'https://sg-wiki-api.hoyolab.com/hoyowiki/wapi/get_entry_page_list'
-        const param = (size, page = 0) => fetchParam({
-            filters: [],
-            menu_id: `${id}`,
-            page_num: page,
-            page_size: size,
-            use_es: true
-        })
+    // async function getItems(id) {
+    //     const url = 'https://sg-wiki-api.hoyolab.com/hoyowiki/wapi/get_entry_page_list'
+    //     const param = (size, page = 0) => fetchParam({
+    //         filters: [],
+    //         menu_id: `${id}`,
+    //         page_num: page,
+    //         page_size: size,
+    //         use_es: true
+    //     })
 
-        return fetch(url, param(0)).then(p => p.json())
-            .then(async dataIndexObj => {
-                console.log(dataIndexObj)
-                let page = Math.ceil(dataIndexObj.data.total / 50)
-                const fetchList = []
-                for (let index = 1; index <= page; index++) {
-                    fetchList.push(
-                        async function () {
-                            await timeout(500 * index)
-                            return fetch(
-                                url, param(50, index)
-                            ).then(p => p.json()).then(itemList => {
-                                const requestList = []
+    //     return fetch(url, param(0)).then(p => p.json())
+    //         .then(async dataIndexObj => {
+    //             console.log(dataIndexObj)
+    //             let page = Math.ceil(dataIndexObj.data.total / 50)
+    //             const fetchList = []
+    //             for (let index = 1; index <= page; index++) {
+    //                 fetchList.push(
+    //                     async function () {
+    //                         await timeout(500 * index)
+    //                         return fetch(
+    //                             url, param(50, index)
+    //                         ).then(p => p.json()).then(itemList => {
+    //                             const requestList = []
 
-                                itemList.data.list.forEach(item => {
+    //                             itemList.data.list.forEach(item => {
 
-                                    const itemObj = {
-                                        name: item.name,
-                                        icon: item.icon_url,
-                                        filter: []
-                                    }
+    //                                 const itemObj = {
+    //                                     name: item.name,
+    //                                     icon: item.icon_url,
+    //                                     filter: []
+    //                                 }
 
-                                    Object.values(item.filter_values).forEach(filterElement => {
-                                        itemObj.filter.push(...filterElement.values)
-                                    })
+    //                                 Object.values(item.filter_values).forEach(filterElement => {
+    //                                     itemObj.filter.push(...filterElement.values)
+    //                                 })
 
-                                    requestList.push(id == 5 ?
-                                        getArtifactChildren(item.entry_page_id, itemObj)
-                                        : itemObj
-                                    )
-                                })
+    //                                 requestList.push(id == 5 ?
+    //                                     getArtifactChildren(item.entry_page_id, itemObj)
+    //                                     : itemObj
+    //                                 )
+    //                             })
 
-                                return requestList
-                            })
-                        }
-                    )
-                }
+    //                             return requestList
+    //                         })
+    //                     }
+    //                 )
+    //             }
 
-                const list = await Promise.all(fetchList.map(f => f()))
-                return list.flat(1)
-            })
-    }
+    //             const list = await Promise.all(fetchList.map(f => f()))
+    //             return list.flat(1)
+    //         })
+    // }
 
     async function getArtifactChildren(id, target) {
         return fetch(
